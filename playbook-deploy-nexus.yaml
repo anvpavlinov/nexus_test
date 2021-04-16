@@ -1,0 +1,39 @@
+- name: Deploy nexus container
+  hosts: all
+
+  tasks:
+    - name: Setup docker
+      block: 
+      - name: Install docker
+        package:
+          name: docker-ce
+          state: present
+      - name: Start docker service
+        service:
+          name: docker
+          state: started
+          enabled: yes
+
+    - name: Deploy nexus and get initial password
+      block:
+        - name: Create and run nexus container
+          docker_container:
+            name: nexus
+            image: sonatype/nexus3:latest
+            volumes:
+              - nexus-data:/nexus-data
+            state: started
+            restart: no
+            recreate: no
+            published_ports:
+              - "8081:8081"
+            detach: yes
+        - name: Get initial admin password
+          shell: 'sleep 10 && cat /var/lib/docker/volumes/nexus-data/_data/admin.password'
+          ignore_errors: yes
+          register: admin_passwd
+          failed_when: "admin_passwd.rc >= 2"
+          changed_when: "admin_passwd.rc == 0"
+
+    - debug: msg="Nexus initial admin password is {{ admin_passwd.stdout_lines[0].strip() }}"
+      when: "admin_passwd.rc == 0"

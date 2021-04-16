@@ -1,2 +1,43 @@
 # nexus_test
-Sonatype nexus3 test installtion with docker and ansible
+Пример тестового развертывания Sonatype nexus3 в docker с использованием ansible.
+
+## Общее описание playbook
+
+Данный playbook предназначен для развертывания сервиса Nexus на целевом сервере.
+
+
+Применить playbook к целевому inventory можно следующей командой:
+
+`$ ansible-playbook -i inventory playbook-deploy-nexus.yaml`
+
+Для отката изменений необходимо использовать другой playbook:
+
+`$ ansible-playbook -i inventory playbook-remove-nexus.yaml`
+
+Обратите внимание! При применении `playbook-remove-nexus.yaml` будут также удалены все созданные тома (docker volumes) 
+и загруженный образ (docker image).
+
+# Initial Nexus Password
+
+При первом применении сценария будет создан секрет для первичного логина через web-ui.
+Секрет будет указан в соответствующем сообщении, при успешном выполнении сценария.
+
+```
+{
+    "msg": "Nexus initial admin password is 87f51a6be3164a17a2c0b4c83cafa482"
+}
+```
+Если соответствующее сообщение не появилось при первом развертывании, необходимо вызвать сценарий deploy повторно.
+Файл с первичным паролем генерируется после первой попытки входа на web-ui.
+
+## Первое подключение
+
+После успешного выполнения сценария развертывания, необходимо подключиться к web-ui, он будет расположен по адресу:
+
+```
+http://IP_ADDRESS:8081
+```
+Где `IP_ADDRESS` - это адрес целевого сервера.
+
+При первом подключении будет запрошен секрет из `admin.password`.
+Как его получить смотри  выше в разделе Initial Nexus Password.

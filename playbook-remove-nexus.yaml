@@ -1,0 +1,21 @@
+- name: Deploy nexus container
+  hosts: all
+
+  tasks:
+    - name: Uninstall nexus
+      block:
+        - name: Remove nexus container
+          docker_container:
+            name: nexus
+            state: absent
+        - name: Delete nexus volumes
+          docker_volume:
+            name: '{{ item }}'
+            state: absent
+          with_items:
+            - nexus-data
+        - name: Delete initial image
+          docker_image:
+            name: sonatype/nexus3
+            tag: latest
+            state: absent
