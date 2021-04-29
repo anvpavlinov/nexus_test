@@ -27,7 +27,10 @@
             recreate: no
             published_ports:
               - "8081:8081"
+              - "8082:8082"
+              - "8083:8083"
             detach: yes
+            restart_policy: unless-stopped
         - name: Get initial admin password
           shell: 'sleep 10 && cat /var/lib/docker/volumes/nexus-data/_data/admin.password'
           ignore_errors: yes

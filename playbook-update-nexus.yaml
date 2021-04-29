@@ -1,0 +1,33 @@
+- name: Update nexus container
+  hosts: all
+
+  tasks:
+    - name: Uninstall Nexus
+      block:
+        - name: Remove nexus container
+          docker_container:
+            name: nexus
+            state: absent
+        - name: Delete initial image
+          docker_image:
+            name: sonatype/nexus3
+            tag: latest
+            state: absent
+
+    - name: Update Nexus conrainer
+      block:
+        - name: Create and run nexus container
+          docker_container:
+            name: nexus
+            image: sonatype/nexus3:latest
+            volumes:
+              - nexus-data:/nexus-data
+            state: started
+            restart: no
+            recreate: no
+            published_ports:
+              - "8081:8081"
+              - "8082:8082"
+              - "8083:8083"
+            detach: yes
+            restart_policy: unless-stopped
